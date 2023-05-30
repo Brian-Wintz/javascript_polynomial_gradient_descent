@@ -1,0 +1,130 @@
+
+<head>
+	<script src=".\lib\plotly-2.20.0.min.js" charset="utf-8"></script>
+</head>
+
+<div id="tester" style="width:800px;height:600px;"></div>
+
+<script>
+
+class Polynomial{
+	constructor(coefficients) {
+		this.coefficients=coefficients;
+	}
+
+	calc(x) {
+		let result=this.coefficients[0];
+		let x2pow=x;
+		var i;
+		for(i=1; i<this.coefficients.length; ++i) {
+			result+=this.coefficients[i]*x2pow;
+			//console.log("  f(x):"+i+":"+this.coefficients[i]+":"+x2pow+":"+result);
+			x2pow*=x;
+		}
+
+		return result;
+	}
+
+	diff(x) {
+		let result=this.coefficients[1];
+		let x2pow=x;
+		var i;
+		for(i=2; i<this.coefficients.length; ++i) {
+			result+=this.coefficients[i]*i*x2pow;
+			//console.log("  f'(x):"+i+":"+this.coefficients[i]+":"+x2pow+":"+result);
+			x2pow*=x;
+		}
+		return result;
+	}
+
+    format_float(f) {
+        return f.toString();
+    }
+
+    string() {
+        var result="";
+        for(i=1; i<this.coefficients.length; ++i) {
+            if(this.coefficients[i]!=0) {
+                if(i==0) {
+                    result=this.format_float(this.coefficients[i]);
+                    continue
+                }
+                if(result!="" && this.coefficients[i]>0) result+="+";
+                var argstr=this.format_float(this.coefficients[i]);
+                // Remove unnecessary +1* and -1* values
+                if(argstr=="1") argstr="+";
+                if(argstr=="-1") argstr="-";
+                // Add "*" for values other than +1 or -1
+                if(argstr!="+" && argstr!="-") argstr+="*";
+                // Use power of value when greater than 1
+                var pow="";
+                if(i>1) pow="^"+i.toString();
+                result+=argstr+"x"+pow;
+            }
+        }
+        return result
+    }
+
+}
+
+var gd=function(obj,start,learn_rate,n_iter) {
+    var vector=start;
+	var i;
+    for(i=0; i<n_iter; ++i) {
+        diff=-learn_rate*obj.diff(vector);
+        vector+=diff;
+        console.log("  gd:"+i+":"+diff+":"+vector);
+	}
+    return vector
+}
+
+const a=[2.0,-1,4.0,-0.5,0.25,0.125];
+
+poly=new Polynomial(a);
+
+var x=2.5;
+var y;
+var i;
+var gdval;
+for(i=0; i<10; ++i) {
+	y=poly.calc(x);
+	gdval=gd(poly,x,0.1,1);
+	console.log("  :"+i+":"+x+":"+y+":"+gdval);
+	x=gdval;
+}
+
+var xplot=[]
+var yplot1=[]
+var yplot2=[]
+
+for(x=-2.0; x<=2.0; x+=0.1) {
+    xplot.push(x);
+    yplot1.push(poly.calc(x));
+    yplot2.push(poly.diff(x));
+}
+
+var trace1={
+    x: xplot,
+    y: yplot1,
+    type: 'lines',
+    name: 'f(x)'
+}
+var trace2={
+    x: xplot,
+    y: yplot2,
+    type: 'lines',
+    name: 'f\'(x)'
+}
+var layout={
+    title: "f(x)="+poly.string()
+}
+var data=[trace1,trace2];
+
+	TESTER = document.getElementById('tester');
+	Plotly.newPlot( TESTER, data, layout);
+/*
+    {
+        title: "f(x)="+poly.string(),
+	    margin: { t: 0 } } );
+*/
+</script>
