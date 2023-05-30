@@ -1,4 +1,4 @@
-# javascript_polynomial_gradient_descent
+# JavaScript Polynomial Gradient Descent
 Used javascript to implement polynomial gradient descent
 
 Implemented graphing of results using javascript ployly library:
